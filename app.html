@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexLocal — Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="app.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#13151f">
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="index.html" class="logo"><span>✨</span> NexLocal</a>
+            <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+        </div>
+        <ul class="nav-menu">
+            <li><a href="#dashboard" class="nav-item active" data-page="dashboard"><span class="nav-icon">📊</span><span class="nav-label">Dashboard</span></a></li>
+            <li><a href="#discover" class="nav-item" data-page="discover"><span class="nav-icon">🔍</span><span class="nav-label">Discover</span></a></li>
+            <li><a href="#collaborations" class="nav-item" data-page="collaborations"><span class="nav-icon">🤝</span><span class="nav-label">Collaborations</span></a></li>
+            <li><a href="#promotions" class="nav-item" data-page="promotions"><span class="nav-icon">🎟️</span><span class="nav-label">Promotions</span></a></li>
+            <li><a href="#chat" class="nav-item" data-page="chat"><span class="nav-icon">💬</span><span class="nav-label">Chat</span><span class="badge">3</span></a></li>
+            <li><a href="#analytics" class="nav-item" data-page="analytics"><span class="nav-icon">📈</span><span class="nav-label">Analytics</span></a></li>
+            <li><a href="#settings" class="nav-item" data-page="settings"><span class="nav-icon">⚙️</span><span class="nav-label">Settings</span></a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <div class="user-card" id="userProfileBtn" style="cursor:pointer;" onclick="document.querySelector('[data-page=\'settings\']').click()">
+                <div class="user-avatar" id="globalAvatar" style="background:var(--primary-blue);color:white;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;">DR</div>
+                <div class="user-info"><span class="user-name" id="globalName">The Daily Roast</span><span class="user-role" id="globalCat">☕ Café</span></div>
+            </div>
+            <a href="index.html" class="nav-item logout" style="color:#dc2626;border:1px solid #e5e7eb;justify-content:center;margin-top:1rem;font-weight:600;"><span class="nav-icon">🚪</span><span class="nav-label">Logout</span></a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <!-- Top Bar -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+                <h2 id="pageTitle">Dashboard</h2>
+            </div>
+            <div class="topbar-right">
+                <div class="search-bar"><input type="text" placeholder="Search businesses..." id="globalSearch"><span class="search-icon">🔍</span></div>
+                <button class="icon-btn notif-btn" id="notifBtn"><span>🔔</span><span class="notif-dot"></span></button>
+            </div>
+        </header>
+
+        <!-- PAGE: Dashboard -->
+        <section class="page active" id="page-dashboard">
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-icon bg-purple">🤝</div><div class="stat-info"><span class="stat-value" data-target="12">0</span><span class="stat-label">Active Collabs</span></div><span class="stat-trend up">+3 this month</span></div>
+                <div class="stat-card"><div class="stat-icon bg-pink">🎟️</div><div class="stat-info"><span class="stat-value" data-target="48">0</span><span class="stat-label">Coupons Redeemed</span></div><span class="stat-trend up">+18% vs last</span></div>
+                <div class="stat-card"><div class="stat-icon bg-blue">👥</div><div class="stat-info"><span class="stat-value" data-target="234">0</span><span class="stat-label">Referrals Sent</span></div><span class="stat-trend up">+42 this week</span></div>
+                <div class="stat-card"><div class="stat-icon bg-green">📍</div><div class="stat-info"><span class="stat-value" data-target="87">0</span><span class="stat-label">Nearby Businesses</span></div><span class="stat-trend neutral">within 2 km</span></div>
+            </div>
+            <div class="dashboard-grid">
+                <div class="card chart-card"><h3>Referral Activity</h3><div class="chart-container" id="referralChart"></div></div>
+                <div class="card"><h3>Recent Activity</h3><div class="activity-feed" id="activityFeed"></div></div>
+                <div class="card"><h3>Pending Requests</h3><div class="request-list" id="pendingRequests"></div></div>
+                <div class="card"><h3>Top Partners</h3><div class="partner-list" id="topPartners"></div></div>
+            </div>
+        </section>
+
+        <!-- PAGE: Discover -->
+        <section class="page" id="page-discover">
+            <div class="discover-controls">
+                <div class="filter-bar">
+                    <select id="categoryFilter"><option value="all">All Categories</option><option value="cafe">☕ Cafés</option><option value="salon">💇 Salons</option><option value="gym">🏋️ Gyms</option><option value="grocery">🛒 Grocery</option><option value="boutique">👗 Boutique</option><option value="bookstore">📚 Bookstore</option></select>
+                    <select id="radiusFilter"><option value="500">500m</option><option value="1000" selected>1 km</option><option value="2000">2 km</option><option value="5000">5 km</option></select>
+                    <button class="btn btn-sm btn-primary" id="locateBtn">📍 My Location</button>
+                </div>
+            </div>
+            <div class="discover-layout">
+                <div class="map-container" id="mapContainer"></div>
+                <div class="business-list" id="businessList"></div>
+            </div>
+        </section>
+
+        <!-- PAGE: Collaborations -->
+        <section class="page" id="page-collaborations">
+            <div class="page-header"><h3>Your Partnerships</h3><button class="btn btn-primary btn-sm" onclick="document.querySelectorAll('.nav-item')[1].click()">+ Find Partners</button></div>
+            <div class="tabs"><button class="tab active" data-tab="active">Active (5)</button><button class="tab" data-tab="pending">Pending (3)</button><button class="tab" data-tab="past">Past (8)</button></div>
+            <div class="collab-grid" id="collabGrid"></div>
+        </section>
+
+        <!-- PAGE: Promotions -->
+        <section class="page" id="page-promotions">
+            <div class="page-header"><h3>Joint Promotions</h3><button class="btn btn-primary btn-sm" id="newPromoBtn">+ Create Promotion</button></div>
+            <div class="promo-grid" id="promoGrid"></div>
+            <!-- Create Promo Modal -->
+            <div class="modal-overlay" id="promoModal">
+                <div class="modal">
+                    <div class="modal-header"><h3>Create Joint Promotion</h3><button class="modal-close" id="closePromoModal">✕</button></div>
+                    <form id="promoForm">
+                        <div class="input-group"><label>Promotion Title</label><input type="text" placeholder='e.g. "Coffee + Book Bundle"' required></div>
+                        <div class="input-group"><label>Partner Business</label><select required><option value="">Select partner</option><option>📚 Chapter & Verse Books</option><option>💇 Glow Up Salon</option><option>🏋️ FitZone Gym</option></select></div>
+                        <div class="input-row"><div class="input-group"><label>Discount %</label><input type="number" min="5" max="50" placeholder="15" required></div><div class="input-group"><label>Max Redemptions</label><input type="number" min="10" placeholder="100" required></div></div>
+                        <div class="input-row"><div class="input-group"><label>Start Date</label><input type="date" required></div><div class="input-group"><label>End Date</label><input type="date" required></div></div>
+                        <div class="input-group"><label>Description</label><textarea rows="3" placeholder="Describe the offer..."></textarea></div>
+                        <button type="submit" class="btn btn-primary btn-full">Launch Promotion 🚀</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE: Chat -->
+        <section class="page" id="page-chat">
+            <div class="chat-layout">
+                <div class="chat-sidebar">
+                    <div class="chat-search"><input type="text" placeholder="Search conversations..."></div>
+                    <div class="chat-list" id="chatList"></div>
+                </div>
+                <div class="chat-main">
+                    <div class="chat-header" id="chatHeader"><div class="chat-partner-info"><div class="avatar">📚</div><div><h4>Chapter & Verse Books</h4><span class="online-status">Online</span></div></div></div>
+                    <div class="chat-messages" id="chatMessages"></div>
+                    <div class="chat-input"><input type="text" placeholder="Type a message..." id="messageInput"><button class="btn btn-primary btn-sm" id="sendBtn">Send</button></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE: Analytics -->
+        <section class="page" id="page-analytics">
+            <div class="analytics-header">
+                <h3>Performance Overview</h3>
+                <div class="period-selector"><button class="period active">7 Days</button><button class="period">30 Days</button><button class="period">90 Days</button></div>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-icon bg-purple">📈</div><div class="stat-info"><span class="stat-value">+32%</span><span class="stat-label">Foot Traffic Increase</span></div></div>
+                <div class="stat-card"><div class="stat-icon bg-pink">💰</div><div class="stat-info"><span class="stat-value">₹18.4K</span><span class="stat-label">Revenue from Collabs</span></div></div>
+                <div class="stat-card"><div class="stat-icon bg-blue">⭐</div><div class="stat-info"><span class="stat-value">4.8</span><span class="stat-label">Partner Satisfaction</span></div></div>
+                <div class="stat-card"><div class="stat-icon bg-green">🔄</div><div class="stat-info"><span class="stat-value">67%</span><span class="stat-label">Referral Conversion</span></div></div>
+            </div>
+            <div class="dashboard-grid">
+                <div class="card chart-card"><h3>Revenue from Partnerships</h3><div class="chart-container" id="revenueChart"></div></div>
+                <div class="card chart-card"><h3>Coupon Redemptions</h3><div class="chart-container" id="couponChart"></div></div>
+                <div class="card"><h3>Top Performing Partners</h3><div id="analyticsPartners"></div></div>
+                <div class="card"><h3>Category Breakdown</h3><div id="categoryBreakdown"></div></div>
+            </div>
+        </section>
+        </section>
+
+        <!-- PAGE: Settings -->
+        <section class="page" id="page-settings">
+            <div class="page-header"><h3>Profile & Settings</h3></div>
+            <div class="card" style="max-width:600px; margin:0 auto;">
+                <form id="settingsForm">
+                    <div style="display:flex; gap:1.5rem; align-items:center; margin-bottom:2rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border-light);">
+                        <div id="settingsAvatarPreview" style="width:80px;height:80px;border-radius:50%;background:var(--primary-light);color:var(--primary-blue);display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:600; cursor:pointer;" title="Click to change photo">DR</div>
+                        <div>
+                            <h4 style="margin-bottom:0.5rem; font-size:1.1rem;">Profile Photo</h4>
+                            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.5rem;">Click the avatar to upload a new image or emoji.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Business Name</label>
+                        <input type="text" id="settingsName" value="The Daily Roast" required>
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Category Emoji</label>
+                            <input type="text" id="settingsEmoji" value="☕" maxlength="2" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Business Category</label>
+                            <input type="text" id="settingsCatName" value="Café" required>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Contact Email</label>
+                        <input type="email" id="settingsEmail" value="hello@dailyroast.local" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Store Address</label>
+                        <input type="text" id="settingsAddress" value="124 Coffee Lane, Central District" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Short Description</label>
+                        <textarea id="settingsDesc" rows="3" style="width:100%; border-radius:6px; border:1px solid var(--border-light); padding:0.6rem; font-family:var(--ff-body);">A cozy local coffee shop specializing in single-origin roasts and fresh baked goods.</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%; margin-top:1rem;">Save Changes</button>
+                </form>
+            </div>
+        </section>
+        
+        <!-- Mobile Bottom Nav -->
+        <nav class="bottom-nav">
+            <a href="#dashboard" class="bottom-nav-item active" data-page="dashboard">
+                <span class="bottom-nav-icon">📊</span>
+                Home
+            </a>
+            <a href="#discover" class="bottom-nav-item" data-page="discover">
+                <span class="bottom-nav-icon">🔍</span>
+                Find
+            </a>
+            <a href="#collaborations" class="bottom-nav-item" data-page="collaborations">
+                <span class="bottom-nav-icon">🤝</span>
+                Partners
+            </a>
+            <a href="#promotions" class="bottom-nav-item" data-page="promotions">
+                <span class="bottom-nav-icon">🎟️</span>
+                Offers
+            </a>
+            <a href="#chat" class="bottom-nav-item" data-page="chat">
+                <span class="bottom-nav-icon">💬</span>
+                Chat
+                <span class="bottom-badge">3</span>
+            </a>
+        </nav>
+    </main>
+
+    <!-- Notification Panel -->
+    <div class="notif-panel" id="notifPanel">
+        <div class="notif-header"><h3>Notifications</h3><button class="btn-text" id="markAllRead">Mark all read</button></div>
+        <div class="notif-list" id="notifList"></div>
+    </div>
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
