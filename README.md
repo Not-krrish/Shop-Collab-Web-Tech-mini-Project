@@ -1,4 +1,4 @@
-🏪 Local Shop Collaboration Finder : Local
+🏪 Local Shop Collaboration Finder : "NextLocal"
 
 📌 Problem Statement
 
